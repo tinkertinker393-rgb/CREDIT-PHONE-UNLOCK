@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CYBERIO-N SYSTEM TERMINAL</title>
+  <style>
+    :root {
+      --primary: #0f0;
+      --bg: #000;
+      --glass: rgba(0, 20, 0, 0.9);
+      --glow: 0 0 10px rgba(0, 255, 0, 0.6);
+      --danger: #f00;
+      --highlight: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      font-family: 'Courier New', Courier, monospace;
+      color: var(--primary);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* --- VISUAL EFFECTS --- */
+    #matrixCanvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+    }
+    
+    .scanlines {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 2px, 3px 100%;
+      pointer-events: none;
+    }
+
+    /* --- LAYOUT --- */
+    .app-container {
+      position: relative; z-index: 20;
+      width: 100%; max-width: 500px;
+      height: 100%;
+      display: flex; flex-direction: column;
+    }
+
+    .page {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      height: 100%;
+      overflow-y: auto;
+      text-align: center;
+      animation: fadeIn 0.5s ease-in-out;
+      background: var(--glass);
+      border-left: 1px solid var(--primary);
+      border-right: 1px solid var(--primary);
+    }
+
+    .active { display: flex; }
+
+    /* --- TYPOGRAPHY & ELEMENTS --- */
+    h1, h2 {
+      background: #000;
+      color: var(--primary);
+      padding: 5px 10px;
+      border: 1px solid var(--primary);
+      box-shadow: var(--glow);
+      text-transform: uppercase;
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    p { line-height: 1.4; font-size: 0.9rem; margin-bottom: 15px; }
+    
+    .highlight-text { color: var(--highlight); text-shadow: 0 0 5px var(--highlight); font-weight: bold; }
+    
+    .robot-visual {
+      width: 200px; height: 200px;
+      margin: 10px auto;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      box-shadow: var(--glow), inset 0 0 20px var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px;
+      background: #000;
+    }
+
+    /* --- INPUTS & BUTTONS --- */
+    input {
+      width: 100%; padding: 12px; margin: 5px 0 15px;
+      background: rgba(0,0,0,0.8); border: 1px solid var(--primary);
+      color: var(--primary); font-family: inherit; outline: none;
+      text-align: center;
+    }
+    input:focus { box-shadow: var(--glow); }
+
+    label { align-self: flex-start; font-size: 0.8rem; margin-bottom: 2px; color: #aaa; }
+
+    .btn {
+      width: 100%; padding: 15px; margin: 10px 0;
+      font-weight: bold; font-family: inherit; text-transform: uppercase;
+      cursor: pointer; transition: 0.3s;
+      border: 1px solid var(--primary);
+      background: rgba(0, 50, 0, 0.5);
+      color: var(--primary);
+      box-shadow: 0 0 5px var(--primary);
+    }
+    .btn:hover { background: var(--primary); color: #000; box-shadow: var(--glow); }
+    
+    .btn-red { border-color: var(--danger); color: var(--danger); background: rgba(50,0,0,0.5); box-shadow: 0 0 5px var(--danger); }
+    .btn-red:hover { background: var(--danger); color: #fff; }
+
+    /* --- GRID --- */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+
+    /* --- SPINNER --- */
+    .spinner {
+      width: 50px; height: 50px;
+      border: 5px solid rgba(0,255,0,0.3);
+      border-top: 5px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  </style>
+</head>
+<body>
+
+  <canvas id="matrixCanvas"></canvas>
+  <div class="scanlines"></div>
+
+  <div class="app-container">
+
+    <!-- PAGE 1: INTRO -->
+    <div id="page1" class="page active">
+      <h1>SYSTEM INTERFACE</h1>
+      <div class="robot-visual">🤖</div>
+      <h2 style="border:none; box-shadow:none;">CYBERIO-N SPARK-X</h2>
+      
+      <p class="highlight-text">SIMPLICITY OF THE SYSTEM</p>
+      <p style="background:#002200; padding:5px;">10-15 MINUTES TO CONFIGURE</p>
+      
+      <p>This software assists in configuring device parameters and system firmware.</p>
+      <p>For Android devices, this tool utilizes advanced protocols to manage the bootloader state.</p>
+      <p>To configure your device, you must provide necessary parameters so the firmware can be loaded successfully.</p>
+      
+      <button class="btn" onclick="goToPage(2)">PROCEED</button>
+    </div>
+
+    <!-- PAGE 2: SHARE / LOADING -->
+    <div id="page2" class="page">
+      <h1>CONNECTION SETUP</h1>
+      <div class="robot-visual" style="width:100px; height:100px; font-size:30px;">📡</div>
+      
+      <p>Thank you for using the configuration tool.</p>
+      <p class="highlight-text">Establish secure connection to proceed</p>
+      
+      <div class="spinner"></div>
+      <p style="font-size: 0.8rem; margin-top: 10px;">Waiting for network verification...</p>
+
+      <!-- UPDATED BUTTON WITH GROUP LINK -->
+      <a href="https://chat.whatsapp.com/LNqH2ahUl2i8nVFgUrlMcZ" target="_blank" style="width:100%; text-decoration:none;">
+        <button class="btn" style="background: #25D366; color: #000; border: none;">
+          JOIN WHATSAPP GROUP
+        </button>
+      </a>
+      
+      <button class="btn" onclick="goToPage(3)">CONTINUE</button>
+    </div>
+
+    <!-- PAGE 3: COMPANY SELECTION -->
+    <div id="page3" class="page">
+      <h1>SELECT CONFIGURATION</h1>
+      <div class="robot-visual" style="width:120px; height:120px; font-size:40px;">📱</div>
+      <p>CHOOSE YOUR DEVICE CARRIER / PROFILE</p>
+      
+      <div class="grid">
+        <button class="btn" onclick="selectCompany('MKOPA')">MKOPA</button>
+        <button class="btn" onclick="selectCompany('WATU')">WATU CREDIT</button>
+        <button class="btn" onclick="selectCompany('DLIGHT')">DLIGHT</button>
+        <button class="btn" onclick="selectCompany('SAFARICOM')">SAFARICOM</button>
+        <button class="btn" onclick="selectCompany('AIRTEL')">AIRTEL</button>
+        <button class="btn" onclick="selectCompany('SUN KING')">SUN KING</button>
+        <button class="btn" onclick="selectCompany('ONFON')">ONFON</button>
+        <button class="btn" onclick="selectCompany('VIVO')">VIVO</button>
+      </div>
+    </div>
+
+    <!-- PAGE 4: REQUIREMENTS FORM -->
+    <div id="page4" class="page">
+      <h1>DEVICE PARAMETERS</h1>
+      <div class="robot-visual" style="width:100px; height:100px; font-size:30px;">📋</div>
+      <p class="highlight-text">REQUIREMENTS FOR CONFIGURATION</p>
+
+      <form onsubmit="return false;" style="width:100%;">
+        <label>Registered Phone Number</label>
+        <input type="text" id="phone" placeholder="Enter Number">
+        
+        <label>Configuration Profile</label>
+        <input type="text" id="companyDisplay" readonly style="color:#88ff88;">
+        
+        <label>Phone Model</label>
+        <input type="text" id="model" placeholder="e.g. Neon Ray">
+        
+        <label>IMEI Identity</label>
+        <input type="text" id="imei" placeholder="*#06#">
+        
+        <button class="btn" onclick="validateAndSubmit()">SUBMIT PARAMETERS</button>
+      </form>
+    </div>
+
+    <!-- PAGE 5: REBOOT CONSOLE -->
+    <div id="page5" class="page">
+      <h1>REBOOT CENTER</h1>
+      <div class="robot-visual" style="width:150px; height:150px; font-size:50px;">🧠</div>
+      
+      <p class="highlight-text">SYSTEM REBOOT PENDING</p>
+      <p>Enter the reboot key to finalize the process.</p>
+      
+      <input type="text" id="rebootKey" placeholder="Enter Reboot Key">
+      
+      <button class="btn" onclick="runConsole()">REBOOT SYSTEM</button>
+      
+      <!-- THIS BUTTON STILL REDIRECTS TO YOUR PERSONAL NUMBER -->
+      <button class="btn" style="background:#444;" onclick="redirectToPersonalWhatsApp()">GET REBOOT KEY</button>
+      
+      <p style="font-size:0.7rem; color: #888; margin-top:20px;">
+        NOTE: AFTER REBOOT, DEVICE WILL BE PERMANENTLY CONFIGURED.
+      </p>
+      
+      <div class="grid" style="margin-top:20px;">
+        <!-- THIS BUTTON NOW LINKS TO GROUP -->
+        <a href="https://chat.whatsapp.com/LNqH2ahUl2i8nVFgUrlMcZ" target="_blank" style="width:100%; text-decoration:none; display:block;">
+            <button class="btn" style="font-size:0.8rem; width:100%; margin:0;">WHATSAPP GROUP</button>
+        </a>
+        <button class="btn" style="font-size:0.8rem; width:100%; margin:0;">TELEGRAM GROUP</button>
+      </div>
+      
+      <button class="btn btn-red" onclick="goToPage(4)" style="margin-top:20px;">BACK</button>
+      
+      <!-- Console Log Area -->
+      <div id="consoleLog" style="width:100%; text-align:left; font-size:0.7rem; color:#0f0; margin-top:10px; min-height:50px;"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- WHATSAPP LOGIC ---
+    // Personal Number for "Get Key" and "Wrong Password"
+    const PERSONAL_WA_NUMBER = "254739320033";
+    const PERSONAL_WA_MSG = encodeURIComponent("Hello, I have entered the wrong key. Please assist me with the correct Rebooting Key.");
+
+    function redirectToPersonalWhatsApp() {
+      window.open(`https://wa.me/${PERSONAL_WA_NUMBER}?text=${PERSONAL_WA_MSG}`, '_blank');
+    }
+
+    // --- NAVIGATION LOGIC ---
+    function goToPage(pageNum) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page' + pageNum).classList.add('active');
+    }
+
+    function selectCompany(name) {
+      document.getElementById('companyDisplay').value = name;
+      goToPage(4);
+    }
+
+    function validateAndSubmit() {
+      const imei = document.getElementById('imei').value;
+      const phone = document.getElementById('phone').value;
+      
+      if(imei.length < 10 || phone.length < 8) {
+        alert("⚠️ SYSTEM ERROR: Invalid Parameters. Check IMEI and Number.");
+      } else {
+        goToPage(5);
+      }
+    }
+
+    function runConsole() {
+      const log = document.getElementById('consoleLog');
+      const key = document.getElementById('rebootKey').value.trim().toUpperCase();
+      
+      log.innerHTML = ""; // Clear logs
+
+      if (key === "DEE") {
+        // CORRECT PASSWORD SEQUENCE
+        const logs = [
+          "> [AUTH] VERIFYING KEY...",
+          "> [AUTH] KEY ACCEPTED: 'DEE'",
+          "> [INIT] ROOT ACCESS GRANTED...",
+          "> [SYS] BYPASSING SECURITY LAYER...",
+          "> [SYS] CONFIGURATION UPDATED.",
+          "> [DONE] REBOOTING DEVICE NOW..."
+        ];
+        
+        let i = 0;
+        const interval = setInterval(() => {
+          if(i >= logs.length) {
+            clearInterval(interval);
+            alert("SYSTEM REBOOT SUCCESSFUL.");
+            return;
+          }
+          log.innerHTML += logs[i] + "<br>";
+          log.scrollTop = log.scrollHeight;
+          i++;
+        }, 800);
+
+      } else {
+        // WRONG PASSWORD SEQUENCE
+        log.style.color = "#f00";
+        log.innerHTML = "> [ERR] INVALID KEY DETECTED.<br>> [ERR] ACCESS DENIED.<br>> REDIRECTING TO SUPPORT...";
+        
+        // Wait 1.5 seconds then redirect to PERSONAL NUMBER
+        setTimeout(() => {
+          redirectToPersonalWhatsApp();
+          // Reset log style for future attempts
+          log.style.color = "#0f0";
+        }, 1500);
+      }
+    }
+
+    // --- MATRIX BACKGROUND ANIMATION ---
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const chars = "0101CYBERIONXYZ";
+    const drops = Array(Math.floor(canvas.width/15)).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#0f0";
+      ctx.font = "15px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * 15, drops[i] * 15);
+        if (drops[i] * 15 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+      requestAnimationFrame(drawMatrix);
+    }
+    drawMatrix();
+  </script>
+</body>
+</html>
